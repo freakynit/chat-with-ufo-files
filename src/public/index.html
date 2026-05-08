@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat with UFO Files — May 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    /* Markdown answer styles — scoped to .prose-answer, amber/gray theme */
+    .prose-answer h1,.prose-answer h2,.prose-answer h3{font-weight:700;margin:1rem 0 .4rem;color:#1c1917}
+    .prose-answer h1{font-size:1.15rem}.prose-answer h2{font-size:1.05rem}.prose-answer h3{font-size:.95rem}
+    .prose-answer p{margin:.5rem 0;line-height:1.7}
+    .prose-answer ul,.prose-answer ol{margin:.5rem 0 .5rem 1.25rem}
+    .prose-answer ul{list-style:disc}.prose-answer ol{list-style:decimal}
+    .prose-answer li{margin:.2rem 0;line-height:1.6}
+    .prose-answer code{background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:.3rem;font-size:.82em;font-family:ui-monospace,monospace}
+    .prose-answer pre{background:#1c1917;color:#fef3c7;padding:1rem;border-radius:.75rem;overflow-x:auto;margin:.75rem 0}
+    .prose-answer pre code{background:transparent;color:inherit;padding:0}
+    .prose-answer blockquote{border-left:3px solid #d97706;padding-left:.75rem;color:#57534e;margin:.5rem 0;font-style:italic}
+    .prose-answer strong{font-weight:700;color:#1c1917}
+    .prose-answer a{color:#b45309;text-decoration:underline}
+    .prose-answer hr{border:none;border-top:1px solid #fde68a;margin:1rem 0}
+    .prose-answer table{width:100%;border-collapse:collapse;font-size:.85rem;margin:.75rem 0}
+    .prose-answer th{background:#fef3c7;color:#92400e;font-weight:600;padding:.4rem .75rem;text-align:left;border:1px solid #fde68a}
+    .prose-answer td{padding:.4rem .75rem;border:1px solid #fde68a}
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#d97706', light: '#fef3c7', dark: '#92400e' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen font-sans">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto px-6 py-4 flex items-center gap-3">
+      <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
+      </svg>
+      <div>
+        <h1 class="text-xl font-semibold tracking-tight leading-tight">Chat with UFO Files</h1>
+        <p class="text-xs text-gray-400 font-normal">May 2026</p>
+      </div>
+      <span id="health-dot" class="ml-auto w-2.5 h-2.5 rounded-full bg-gray-300" title="Checking server…"></span>
+      <span id="health-label" class="text-xs text-gray-400">checking…</span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="max-w-4xl mx-auto px-6 py-8 space-y-6">
+
+    <!-- Mode tabs -->
+    <div class="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+      <button id="tab-search" onclick="switchTab('search')"
+        class="px-5 py-2 rounded-lg text-sm font-medium transition-all bg-white text-amber-700 shadow-sm">
+        Search
+      </button>
+      <button id="tab-ask" onclick="switchTab('ask')"
+        class="px-5 py-2 rounded-lg text-sm font-medium transition-all text-gray-500 hover:text-gray-700">
+        Ask
+      </button>
+    </div>
+
+    <!-- Query form -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+          <span id="label-query">Search query</span>
+        </label>
+        <textarea id="query-input" rows="3" placeholder="Type your query here…"
+          class="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition placeholder-gray-400"></textarea>
+      </div>
+      <div class="flex items-end gap-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Top K results</label>
+          <input id="topk-input" type="number" value="5" min="1" max="20"
+            class="w-20 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-center" />
+        </div>
+        <button id="submit-btn" onclick="handleSubmit()"
+          class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-medium rounded-xl py-2.5 text-sm transition-all shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+          </svg>
+          <span id="btn-label">Search</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Answer panel (Ask mode only) -->
+    <div id="answer-panel" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-6 space-y-2">
+      <div class="flex items-center gap-2 text-amber-800 font-medium text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/>
+        </svg>
+        Answer
+      </div>
+      <div id="answer-text" class="prose-answer text-sm text-gray-800"></div>
+    </div>
+
+    <!-- Results -->
+    <div id="results-section" class="hidden space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+          Matched chunks — <span id="results-count">0</span> result(s)
+        </h2>
+        <span id="query-echo" class="text-xs text-gray-400 italic truncate max-w-xs"></span>
+      </div>
+      <div id="results-list" class="space-y-3"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="py-16 text-center text-gray-400 space-y-2">
+      <svg class="w-10 h-10 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
+      </svg>
+      <p class="text-sm">Run a search or ask a question to see results.</p>
+      <p class="text-xs text-gray-300 pt-4">
+        Ready to go — files &amp; database pre-built ·
+        <a href="https://github.com/freakynit/chat-with-ufo-files" target="_blank" rel="noopener"
+          class="hover:text-gray-400 underline underline-offset-2 transition-colors">
+          github.com/freakynit/chat-with-ufo-files
+        </a>
+      </p>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader" class="hidden py-16 flex flex-col items-center gap-3 text-gray-400">
+      <svg class="w-8 h-8 animate-spin text-amber-400" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+      </svg>
+      <span class="text-sm" id="loader-label">Searching…</span>
+    </div>
+
+    <!-- Error -->
+    <div id="error-panel" class="hidden bg-red-50 border border-red-200 rounded-2xl p-5 text-sm text-red-700">
+      <strong>Error:</strong> <span id="error-text"></span>
+    </div>
+
+  </main>
+
+  <script>
+    let currentTab = 'search';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const isAsk = tab === 'ask';
+
+      // Tab buttons
+      const active = 'bg-white text-amber-700 shadow-sm';
+      const inactive = 'text-gray-500 hover:text-gray-700';
+      document.getElementById('tab-search').className = `px-5 py-2 rounded-lg text-sm font-medium transition-all ${tab === 'search' ? active : inactive}`;
+      document.getElementById('tab-ask').className = `px-5 py-2 rounded-lg text-sm font-medium transition-all ${isAsk ? active : inactive}`;
+
+      document.getElementById('label-query').textContent = isAsk ? 'Your question' : 'Search query';
+      document.getElementById('btn-label').textContent = isAsk ? 'Ask' : 'Search';
+      document.getElementById('query-input').placeholder = isAsk ? 'Ask a question about your documents…' : 'Type your query here…';
+
+      // Clear results
+      resetUI();
+    }
+
+    function resetUI() {
+      document.getElementById('answer-panel').classList.add('hidden');
+      document.getElementById('results-section').classList.add('hidden');
+      document.getElementById('empty-state').classList.remove('hidden');
+      document.getElementById('error-panel').classList.add('hidden');
+      document.getElementById('loader').classList.add('hidden');
+    }
+
+    function showLoader(msg) {
+      document.getElementById('loader-label').textContent = msg;
+      document.getElementById('loader').classList.remove('hidden');
+      document.getElementById('loader').classList.add('flex');
+      document.getElementById('empty-state').classList.add('hidden');
+      document.getElementById('results-section').classList.add('hidden');
+      document.getElementById('answer-panel').classList.add('hidden');
+      document.getElementById('error-panel').classList.add('hidden');
+    }
+
+    function showError(msg) {
+      document.getElementById('loader').classList.add('hidden');
+      document.getElementById('error-text').textContent = msg;
+      document.getElementById('error-panel').classList.remove('hidden');
+    }
+
+    async function handleSubmit() {
+      const query = document.getElementById('query-input').value.trim();
+      if (!query) {
+        document.getElementById('query-input').focus();
+        return;
+      }
+      const topK = parseInt(document.getElementById('topk-input').value) || 5;
+      const isAsk = currentTab === 'ask';
+
+      document.getElementById('submit-btn').disabled = true;
+      showLoader(isAsk ? 'Thinking…' : 'Searching…');
+
+      try {
+        const endpoint = isAsk ? '/api/ask' : '/api/search';
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, topK })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+        document.getElementById('loader').classList.add('hidden');
+
+        if (isAsk && data.answer) {
+          document.getElementById('answer-text').innerHTML = marked.parse(data.answer);
+          document.getElementById('answer-panel').classList.remove('hidden');
+        }
+
+        renderMatches(data.matches || [], query);
+
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        document.getElementById('submit-btn').disabled = false;
+      }
+    }
+
+    function renderMatches(matches, query) {
+      const section = document.getElementById('results-section');
+      const list = document.getElementById('results-list');
+
+      document.getElementById('results-count').textContent = matches.length;
+      document.getElementById('query-echo').textContent = `"${query}"`;
+
+      list.innerHTML = '';
+
+      if (matches.length === 0) {
+        list.innerHTML = '<p class="text-sm text-gray-400 text-center py-6">No matching chunks found.</p>';
+      } else {
+        matches.forEach((m, i) => renderChunkCard(list, m, i));
+      }
+
+      section.classList.remove('hidden');
+    }
+
+    function renderChunkCard(container, match, index) {
+      const card = document.createElement('div');
+      card.className = 'bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden';
+
+      const distPct = match.distance != null ? (match.distance * 100).toFixed(1) : null;
+      const distLabel = distPct !== null
+        ? `<span class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium">dist ${match.distance.toFixed(4)}</span>`
+        : '';
+
+      const fileName = match.file?.relpath || 'unknown';
+      const downloadUrl = match.file?.downloadUrl || '#';
+
+      const previewLen = 280;
+      const fullText = match.text || '';
+      const preview = fullText.length > previewLen ? fullText.slice(0, previewLen) + '…' : fullText;
+      const hasMore = fullText.length > previewLen;
+
+      card.innerHTML = `
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center">${index + 1}</span>
+          <span class="text-sm font-medium text-gray-800 truncate flex-1" title="${fileName}">${fileName}</span>
+          ${distLabel}
+          <a href="${downloadUrl}" download
+            class="flex-shrink-0 flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-amber-700 border border-gray-200 hover:border-amber-300 rounded-lg px-3 py-1.5 transition-all">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Download
+          </a>
+        </div>
+        <div class="px-5 py-4">
+          <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap chunk-preview">${escHtml(preview)}</p>
+          ${hasMore ? `
+            <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap chunk-full hidden">${escHtml(fullText)}</p>
+            <button onclick="toggleChunk(this)" class="mt-3 text-xs text-amber-600 hover:text-amber-800 font-medium transition-colors">
+              Show more ↓
+            </button>` : ''}
+        </div>
+        <div class="px-5 pb-3 flex items-center gap-3 text-xs text-gray-400">
+          <span>Chunk #${match.chunkIndex ?? '—'}</span>
+          <span>·</span>
+          <span>ID ${match.chunkId ?? '—'}</span>
+        </div>
+      `;
+
+      container.appendChild(card);
+    }
+
+    function toggleChunk(btn) {
+      const card = btn.closest('.bg-white');
+      const preview = card.querySelector('.chunk-preview');
+      const full = card.querySelector('.chunk-full');
+      const expanded = !full.classList.contains('hidden');
+      preview.classList.toggle('hidden', !expanded);
+      full.classList.toggle('hidden', expanded);
+      btn.textContent = expanded ? 'Show more ↓' : 'Show less ↑';
+    }
+
+    function escHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Allow Ctrl+Enter / Cmd+Enter to submit
+    document.getElementById('query-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleSubmit();
+    });
+
+    // Health check
+    async function checkHealth() {
+      try {
+        const r = await fetch('/health');
+        const dot = document.getElementById('health-dot');
+        const label = document.getElementById('health-label');
+        if (r.ok) {
+          dot.className = 'ml-auto w-2.5 h-2.5 rounded-full bg-emerald-400';
+          label.textContent = 'online';
+          label.className = 'text-xs text-emerald-600';
+        } else {
+          throw new Error();
+        }
+      } catch {
+        document.getElementById('health-dot').className = 'ml-auto w-2.5 h-2.5 rounded-full bg-red-400';
+        document.getElementById('health-label').textContent = 'offline';
+        document.getElementById('health-label').className = 'text-xs text-red-500';
+      }
+    }
+
+    checkHealth();
+  </script>
+</body>
+</html>

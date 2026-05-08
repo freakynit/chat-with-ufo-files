@@ -1,0 +1,17 @@
+{
+  "name": "rag-system",
+  "version": "1.0.0",
+  "description": "Simple RAG chat system for markdown files using sqlite-vec",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "ingest": "node src/ingest.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.5.0",
+    "express": "^4.21.1",
+    "p-limit": "^6.1.0",
+    "sqlite-vec": "^0.1.6"
+  }
+}
