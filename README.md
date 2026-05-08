@@ -17,7 +17,8 @@ A minimal, API-driven Retrieval-Augmented Generation system over markdown files,
 ## Install
 
 ```bash
-cd rag-system
+git clone git@github.com:freakynit/chat-with-ufo-files.git
+cd chat-with-ufo-files
 npm install
 ```
 
