@@ -34,7 +34,7 @@ Edit `config.json`:
     "publicBaseUrl": "http://localhost:3000"
   },
   "data": {
-    "markdownFolder": "./data",
+    "markdownFolder": "./ufo-files",
     "dbPath": "./rag.db"
   },
   "openai": {
